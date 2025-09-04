@@ -1,0 +1,14 @@
+.custom-button {
+    -fx-font-size: 50px;
+    -fx-text-fill: black;
+    -fx-font-family: 'Arial';
+}
+
+.custom-button:hover {
+   
+}
+.custom-button2 {
+    -fx-font-size: 50px;
+    -fx-text-fill: black;
+    -fx-font-family: 'Arial';
+}
