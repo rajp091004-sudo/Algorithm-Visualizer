@@ -1,16 +1,9 @@
 {
+    "java.project.sourcePaths": [
+        "src"
+    ],
+    "java.project.outputPath": "bin",
     "java.project.referencedLibraries": [
-        "lib/**/*.jar",
-        "c:\\Users\\rajp9\\Java Projects\\javafx-sdk-24.0.2\\lib\\javafx.base.jar",
-        "c:\\Users\\rajp9\\Java Projects\\javafx-sdk-24.0.2\\lib\\javafx.controls.jar",
-        "c:\\Users\\rajp9\\Java Projects\\javafx-sdk-24.0.2\\lib\\javafx.fxml.jar",
-        "c:\\Users\\rajp9\\Java Projects\\javafx-sdk-24.0.2\\lib\\javafx.graphics.jar",
-        "c:\\Users\\rajp9\\Java Projects\\javafx-sdk-24.0.2\\lib\\javafx.media.jar",
-        "c:\\Users\\rajp9\\Java Projects\\javafx-sdk-24.0.2\\lib\\javafx.swing.jar",
-        "c:\\Users\\rajp9\\Java Projects\\javafx-sdk-24.0.2\\lib\\javafx.web.jar",
-        "c:\\Users\\rajp9\\Java Projects\\javafx-sdk-24.0.2\\lib\\javafx-swt.jar",
-        "c:\\Users\\rajp9\\Java Projects\\javafx-sdk-24.0.2\\lib\\jdk.jsobject.jar",
-        "c:\\Users\\rajp9\\Java Projects\\javafx-sdk-24.0.2\\lib\\jfx.incubator.input.jar",
-        "c:\\Users\\rajp9\\Java Projects\\javafx-sdk-24.0.2\\lib\\jfx.incubator.richtext.jar"
+        "javafx-sdk-21.0.2/lib/*.jar"
     ]
 }
