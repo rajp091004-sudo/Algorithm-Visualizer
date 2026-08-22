@@ -1,5 +1,11 @@
 import java.util.ArrayList;
 import java.util.List;
+
+import javafx.animation.KeyFrame;
+import javafx.animation.PauseTransition;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
+import javafx.animation.PauseTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -24,11 +30,10 @@ import java.util.Collections;
 public class ArrayScreen {
 
     private final Pane canvas = new Pane();
-    private final List<IntNode> nodes = new ArrayList<>();      
+    private final List<IntNode> nodes = new ArrayList<>();
     private final List<Integer> values = new ArrayList<>();
     NumberAxis xAxis = new NumberAxis();
     NumberAxis yAxis = new NumberAxis();
-    
 
     public Scene create(Stage stage, Scene selectScene) {
 
@@ -40,9 +45,8 @@ public class ArrayScreen {
             nodes.clear();
             canvas.getChildren().clear();
             values.addAll(ArrayCreation.display());
-            plotValues(values);
+            plotValues(values, values.size() + 1, values.size() + 2);
         });
-
 
         Button sort = new Button("Sort Array");
         setButtonSize(sort);
@@ -52,9 +56,9 @@ public class ArrayScreen {
 
         randomize.setOnAction(e -> {
             Collections.shuffle(values);
-            plotValues(values);
+            plotValues(values, values.size() + 1, values.size() + 2);
         });
-        
+
         Button clearNode = new Button("Clear Canvas");
         setButtonSize(clearNode);
 
@@ -75,7 +79,6 @@ public class ArrayScreen {
                 radixSort = new Button("Radix Sort"),
                 bucketSort = new Button("Bucket Sort"),
                 backButton = new Button("Back");
-
 
         Button stepByStep = new Button("View Step By Step");
         setButtonSize(stepByStep);
@@ -103,8 +106,7 @@ public class ArrayScreen {
                 sort,
                 stepByStep,
                 clearNode,
-                selectScreenButton
-        );
+                selectScreenButton);
         TilePane sortMenu = new TilePane();
         sortMenu.setPrefColumns(5);
         setButtonSize(bubbleSort);
@@ -130,9 +132,8 @@ public class ArrayScreen {
                 countingSort,
                 radixSort,
                 bucketSort,
-                backButton
-        );
-        
+                backButton);
+
         BorderPane layout5 = new BorderPane();
 
         layout5.setCenter(canvas);
@@ -146,6 +147,9 @@ public class ArrayScreen {
         backButton.setOnAction(e -> {
             layout5.setBottom(menu);
         });
+        bubbleSort.setOnAction(e -> {
+            bubbleAlgo(values);
+        });
         return scene;
     }
 
@@ -155,103 +159,157 @@ public class ArrayScreen {
         button.setPrefSize(250, 75);
     }
 
- 
-    private void plotValues(List<Integer> values) {
-    canvas.getChildren().clear();
-    
-    if (values.isEmpty()) {
-        return;
-    }
+    private void plotValues(List<Integer> values, int index1, int index2) {
+        canvas.getChildren().clear();
 
-    double chartWidth = 1000;
-    double chartHeight = 400;
-    double bottomY = 500;
+        if (values.isEmpty()) {
+            return;
+        }
 
-    // Find the largest value.
-    int maximum = values.get(0);
+        double chartWidth = 1000;
+        double chartHeight = 400;
+        double bottomY = 500;
 
-    for (int value : values) {
-        if (value > maximum) {
-            maximum = value;
+        // Find the largest value.
+        int maximum = values.get(0);
+
+        for (int value : values) {
+            if (value > maximum) {
+                maximum = value;
+            }
+        }
+
+        // Prevent division by zero.
+        if (maximum == 0) {
+            maximum = 1;
+        }
+
+        double barWidth = chartWidth / values.size();
+
+        double heightScale = chartHeight / maximum;
+        double canvasWidth = canvas.getWidth();
+
+        if (canvasWidth == 0) {
+            canvasWidth = 1280;
+        }
+
+        double startX = (canvasWidth - chartWidth) / 2;
+        // Draw the horizontal baseline.
+        Line baseline = new Line(
+                startX,
+                bottomY,
+                startX + chartWidth,
+                bottomY);
+
+        baseline.setStroke(Color.BLACK);
+        baseline.setStrokeWidth(2);
+
+        canvas.getChildren().add(baseline);
+
+        for (int i = 0; i < values.size(); i++) {
+            int value = values.get(i);
+
+            double barHeight = value * heightScale;
+            double x = startX + i * (barWidth);
+            double y = bottomY - barHeight;
+
+            Rectangle bar = new Rectangle(
+                    x,
+                    y,
+                    barWidth,
+                    barHeight);
+
+            if (i == index1) {
+                bar.setFill(Color.ROYALBLUE);
+            } else if (i == index2) {
+                bar.setFill(Color.NAVY);
+            } else {
+                bar.setFill(Color.DODGERBLUE);
+            }
+
+            bar.setStroke(Color.BLACK);
+
+            // Value displayed above the bar.
+            Text valueText = new Text(String.valueOf(value));
+
+            valueText.setFont(new Font("Consolas", 16));
+
+            valueText.setX(
+                    x + barWidth / 2
+                            - valueText.getLayoutBounds().getWidth() / 2);
+
+            valueText.setY(y - 5);
+
+            // Array index displayed below the bar.
+            Text indexText = new Text(
+                    String.valueOf(i));
+
+            indexText.setFont(new Font("Consolas", 14));
+
+            indexText.setX(
+                    x + barWidth / 2
+                            - indexText.getLayoutBounds().getWidth() / 2);
+
+            indexText.setY(bottomY + 20);
+
+            canvas.getChildren().addAll(
+                    bar,
+                    valueText,
+                    indexText);
         }
     }
 
-    // Prevent division by zero.
-    if (maximum == 0) {
-        maximum = 1;
+    private void bubbleAlgo(List<Integer> values) {
+    if (values.size() < 2) {
+        return;
     }
 
-    double barWidth = chartWidth / values.size();
+    Timeline timeline = new Timeline();
 
-    double heightScale = chartHeight / maximum;
-    double canvasWidth = canvas.getWidth();
+    double elapsedTime = 0;
+    double delay = 500; // Half a second
 
-    if (canvasWidth == 0) {
-        canvasWidth = 1280;
+    for (int i = 0; i < values.size() - 1; i++) {
+        for (int j = 0; j < values.size() - i - 1; j++) {
+
+            final int index1 = j;
+            final int index2 = j + 1;
+
+            // Highlight the two values being compared.
+            timeline.getKeyFrames().add(
+                new KeyFrame(Duration.millis(elapsedTime), e -> {
+                    plotValues(values, index1, index2);
+                })
+            );
+
+            elapsedTime += delay;
+
+            // Swap them if they are out of order.
+            timeline.getKeyFrames().add(
+                new KeyFrame(Duration.millis(elapsedTime), e -> {
+                    if (values.get(index1) > values.get(index2)) {
+                        Collections.swap(values, index1, index2);
+                    }
+
+                    plotValues(values, index1, index2);
+                })
+            );
+
+            elapsedTime += delay;
+        }
     }
 
-double startX = (canvasWidth - chartWidth) / 2;
-    // Draw the horizontal baseline.
-    Line baseline = new Line(
-            startX,
-            bottomY,
-            startX + chartWidth,
-            bottomY
+    // Remove the red and yellow highlighting when finished.
+    timeline.getKeyFrames().add(
+        new KeyFrame(Duration.millis(elapsedTime), e -> {
+            plotValues(
+                values,
+                values.size() + 1,
+                values.size() + 2
+            );
+        })
     );
 
-    baseline.setStroke(Color.BLACK);
-    baseline.setStrokeWidth(2);
-
-    canvas.getChildren().add(baseline);
-
-    for (int i = 0; i < values.size(); i++) {
-        int value = values.get(i);
-
-        double barHeight = value * heightScale;
-        double x = startX + i * (barWidth);
-        double y = bottomY - barHeight;
-
-        Rectangle bar = new Rectangle(
-                x,
-                y,
-                barWidth,
-                barHeight
-        );
-
-        bar.setFill(Color.DODGERBLUE);
-        bar.setStroke(Color.BLACK);
-
-        // Value displayed above the bar.
-        Text valueText = new Text(String.valueOf(value));
-
-        valueText.setFont(new Font("Consolas", 16));
-
-        valueText.setX(
-                x + barWidth / 2
-                - valueText.getLayoutBounds().getWidth() / 2
-        );
-
-        valueText.setY(y - 5);
-
-        // Array index displayed below the bar.
-        Text indexText = new Text(
-                String.valueOf(i)
-        );
-
-        indexText.setFont(new Font("Consolas", 14));
-
-        indexText.setX(
-                x + barWidth / 2
-                - indexText.getLayoutBounds().getWidth() / 2
-        );
-
-        indexText.setY(bottomY + 20);
-
-        canvas.getChildren().addAll(
-                bar,
-                valueText,
-                indexText
-        );
-    }
+    timeline.play();
 }
 }
