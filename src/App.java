@@ -285,9 +285,10 @@ public class App extends Application {
         //Scene 3
         //This is currently empty until its screen is implemented.
         BorderPane layout3 = new BorderPane();
-
-        scene3 = new Scene(layout3, 1280, 700);
-        scene3.getStylesheets().add("style.css");
+        
+        ArrayScreen arrayScreen = new ArrayScreen();
+        scene3 = arrayScreen.create(window, scene2);
+       
 
         //Scene 5
         //The linked-list screen is created in NodeScreen.java.
