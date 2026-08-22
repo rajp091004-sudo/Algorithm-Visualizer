@@ -1,3 +1,6 @@
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.text.LabelView;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -7,10 +10,12 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -18,13 +23,10 @@ import javafx.scene.image.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.control.TextField;
-import java.util.ArrayList;
-import java.util.List;
-
-//Operates the linked list window
-@SuppressWarnings("unused")
-public class NodeCreation{
+import javafx.scene.layout.Pane;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+public class ArrayBlock {
     public static List<Integer> display()
     {
         List<Integer> values = new ArrayList<>();
