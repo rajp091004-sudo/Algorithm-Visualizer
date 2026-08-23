@@ -150,6 +150,10 @@ public class ArrayScreen {
         bubbleSort.setOnAction(e -> {
             bubbleAlgo(values);
         });
+
+        selectionSort.setOnAction(e ->{
+            selectionAlgo(values);
+        });
         return scene;
     }
 
@@ -260,56 +264,101 @@ public class ArrayScreen {
     }
 
     private void bubbleAlgo(List<Integer> values) {
-    if (values.size() < 2) {
-        return;
-    }
-
-    Timeline timeline = new Timeline();
-
-    double elapsedTime = 0;
-    double delay = 500; // Half a second
-
-    for (int i = 0; i < values.size() - 1; i++) {
-        for (int j = 0; j < values.size() - i - 1; j++) {
-
-            final int index1 = j;
-            final int index2 = j + 1;
-
-            // Highlight the two values being compared.
-            timeline.getKeyFrames().add(
-                new KeyFrame(Duration.millis(elapsedTime), e -> {
-                    plotValues(values, index1, index2);
-                })
-            );
-
-            elapsedTime += delay;
-
-            // Swap them if they are out of order.
-            timeline.getKeyFrames().add(
-                new KeyFrame(Duration.millis(elapsedTime), e -> {
-                    if (values.get(index1) > values.get(index2)) {
-                        Collections.swap(values, index1, index2);
-                    }
-
-                    plotValues(values, index1, index2);
-                })
-            );
-
-            elapsedTime += delay;
+        if (values.size() < 2) {
+            return;
         }
+
+        Timeline timeline = new Timeline();
+
+        double elapsedTime = 0;
+        double delay = 500; // Half a second
+
+        for (int i = 0; i < values.size() - 1; i++) {
+            for (int j = 0; j < values.size() - i - 1; j++) {
+
+                final int index1 = j;
+                final int index2 = j + 1;
+
+                // Highlight the two values being compared.
+                timeline.getKeyFrames().add(
+                        new KeyFrame(Duration.millis(elapsedTime), e -> {
+                            plotValues(values, index1, index2);
+                        }));
+
+                elapsedTime += delay;
+
+                // Swap them if they are out of order.
+                timeline.getKeyFrames().add(
+                        new KeyFrame(Duration.millis(elapsedTime), e -> {
+                            if (values.get(index1) > values.get(index2)) {
+                                Collections.swap(values, index1, index2);
+                            }
+
+                            plotValues(values, index1, index2);
+                        }));
+
+                elapsedTime += delay;
+            }
+        }
+
+        // Remove the red and yellow highlighting when finished.
+        timeline.getKeyFrames().add(
+                new KeyFrame(Duration.millis(elapsedTime), e -> {
+                    plotValues(
+                            values,
+                            values.size() + 1,
+                            values.size() + 2);
+                }));
+
+        timeline.play();
     }
 
-    // Remove the red and yellow highlighting when finished.
-    timeline.getKeyFrames().add(
-        new KeyFrame(Duration.millis(elapsedTime), e -> {
-            plotValues(
-                values,
-                values.size() + 1,
-                values.size() + 2
-            );
-        })
-    );
+    public void selectionAlgo(List<Integer> values) {
+        if (values.size() < 2) {
+            return;
+        }
+        int temp;
+        Timeline timeline = new Timeline();
+        double elapsedTime = 0;
+        double delay = 500;
 
-    timeline.play();
-}
+        for (int i = 0; i < values.size(); i++) {
+            int minIndex = i;
+            for (int j = i + 1; j < values.size(); j++) {
+                final int currentJ = j;
+                if (values.get(minIndex) > values.get(j)) {
+                    minIndex = j;
+                }
+                final int currentMinIndex = minIndex;
+                final List<Integer> currentValues = new ArrayList<>(values);
+                timeline.getKeyFrames().add(
+                        new KeyFrame(Duration.millis(elapsedTime), e -> {
+                            plotValues(
+                                    currentValues,
+                                    currentMinIndex,
+                                    currentJ);
+                        }));
+
+                elapsedTime += delay;
+            }
+            temp = values.get(i);
+            values.set(i, values.get(minIndex));
+            values.set(minIndex, temp);
+
+            final int swapIndex1 = i;
+            final int swapIndex2 = minIndex;
+            final List<Integer> swappedValues = new ArrayList<>(values);
+            timeline.getKeyFrames().add(
+                    new KeyFrame(Duration.millis(elapsedTime), e -> {
+                        plotValues(
+                                swappedValues,
+                                swapIndex1,
+                                swapIndex2);
+                    }));
+
+            elapsedTime += delay;
+
+        }
+        timeline.play();
+    }
 }

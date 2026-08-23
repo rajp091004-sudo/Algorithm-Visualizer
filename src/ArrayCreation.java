@@ -21,6 +21,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.control.TextField;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 //Operates the linked list window
 @SuppressWarnings("unused")
@@ -36,6 +37,7 @@ public class ArrayCreation{
         window.setMinHeight(400);
         TextField input = new TextField(); 
         input.setPromptText("Please enter a valid integer");
+        TextField input2 = new TextField(); 
         Label currentArray = new Label(); 
         currentArray.setText("Current Array: \n" + values.toString());
         currentArray.setFont(new Font("Verdana", 40));
@@ -52,7 +54,27 @@ public class ArrayCreation{
                 input.clear();
                 input.setPromptText("Please enter a valid integer");
         }});
-        
+                Button randomizeButton = new Button("Randomize");
+
+        randomizeButton.setOnAction(e -> {
+            try {
+                int length = Integer.parseInt(input2.getText().trim());
+
+                values.clear();
+
+                Random random = new Random();
+
+                for (int i = 0; i < length; i++) {
+                    values.add(random.nextInt(100) + 1);
+                }
+
+                window.close();
+
+            } catch (NumberFormatException ex) {
+                input2.clear();
+                input2.setPromptText("Enter a valid array length");
+            }
+        });
         Button closeButton = new Button("Finish"); 
         closeButton.setPrefSize(50, 25);
         closeButton.setOnAction(e -> {
@@ -62,7 +84,7 @@ public class ArrayCreation{
         
         
         VBox menu = new VBox(); 
-        menu.getChildren().addAll(input,createButton,closeButton,currentArray);
+        menu.getChildren().addAll(input,input2, createButton, randomizeButton, closeButton,currentArray);
         GridPane layout = new GridPane(); 
 
         layout.getChildren().add(menu);
