@@ -37,7 +37,6 @@ public class ArrayCreation{
         window.setMinHeight(400);
         TextField input = new TextField(); 
         input.setPromptText("Please enter a valid integer");
-        TextField input2 = new TextField(); 
         Label currentArray = new Label(); 
         currentArray.setText("Current Array: \n" + values.toString());
         currentArray.setFont(new Font("Verdana", 40));
@@ -58,7 +57,7 @@ public class ArrayCreation{
 
         randomizeButton.setOnAction(e -> {
             try {
-                int length = Integer.parseInt(input2.getText().trim());
+                int length = Integer.parseInt(input.getText().trim());
 
                 values.clear();
 
@@ -71,8 +70,8 @@ public class ArrayCreation{
                 window.close();
 
             } catch (NumberFormatException ex) {
-                input2.clear();
-                input2.setPromptText("Enter a valid array length");
+                input.clear();
+                input.setPromptText("Enter a valid array length");
             }
         });
         Button closeButton = new Button("Finish"); 
@@ -84,7 +83,7 @@ public class ArrayCreation{
         
         
         VBox menu = new VBox(); 
-        menu.getChildren().addAll(input,input2, createButton, randomizeButton, closeButton,currentArray);
+        menu.getChildren().addAll(input, createButton, randomizeButton, closeButton,currentArray);
         GridPane layout = new GridPane(); 
 
         layout.getChildren().add(menu);
