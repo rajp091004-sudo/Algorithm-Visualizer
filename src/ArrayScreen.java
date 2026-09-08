@@ -133,6 +133,9 @@ public class ArrayScreen {
             quickAlgo(values);
         });
         setButtonSize(heapSort);
+        heapSort.setOnAction(e -> {
+            heapAlgo(values);
+        });
 
         setButtonSize(shellSort);
         shellSort.setOnAction(e -> {
@@ -147,8 +150,11 @@ public class ArrayScreen {
             radixAlgo(values);
         });
         setButtonSize(bucketSort);
-        setButtonSize(backButton);
+        bucketSort.setOnAction(e -> {
+            bucketAlgo(values);
+        });
 
+        setButtonSize(backButton);
         backButton.setOnAction(e -> {
             layout.setBottom(menu);
         });
@@ -1224,146 +1230,351 @@ public class ArrayScreen {
 
         timeline.play();
     }
-private void radixAlgo(List<Integer> values) {
-    if (values.size() < 2) {
-        return;
-    }
 
-    // This version only supports non-negative integers.
-    for (int value : values) {
-        if (value < 0) {
-            throw new IllegalArgumentException(
-                "Radix sort requires non-negative integers."
-            );
-        }
-    }
-
-    Timeline timeline = new Timeline();
-
-    double elapsedTime = 0;
-    double delay = 500;
-
-    List<Integer> workingValues =
-            new ArrayList<>(values);
-
-    int maximum = Collections.max(workingValues);
-
-    /*
-     * place = 1    → ones digit
-     * place = 10   → tens digit
-     * place = 100  → hundreds digit
-     */
-    for (long place = 1;
-            maximum / place > 0;
-            place *= 10) {
-
-        int currentPlace = (int) place;
-
-        int[] counts = new int[10];
-
-        // Count each digit from 0 through 9.
-        for (int value : workingValues) {
-            int digit =
-                    (value / currentPlace) % 10;
-
-            counts[digit]++;
+    private void radixAlgo(List<Integer> values) {
+        if (values.size() < 2) {
+            return;
         }
 
-        // Convert counts into output positions.
-        for (int digit = 1;
-                digit < counts.length;
-                digit++) {
-
-            counts[digit] +=
-                    counts[digit - 1];
+        // This version only supports non-negative integers.
+        for (int value : values) {
+            if (value < 0) {
+                throw new IllegalArgumentException(
+                        "Radix sort requires non-negative integers.");
+            }
         }
 
-        List<Integer> outputValues =
-                new ArrayList<>(
-                    Collections.nCopies(
-                        workingValues.size(),
-                        null
-                    )
-                );
+        Timeline timeline = new Timeline();
+
+        double elapsedTime = 0;
+        double delay = 500;
+
+        List<Integer> workingValues = new ArrayList<>(values);
+
+        int maximum = Collections.max(workingValues);
 
         /*
-         * Work backward to preserve the order
-         * of values with matching digits.
+         * place = 1 → ones digit
+         * place = 10 → tens digit
+         * place = 100 → hundreds digit
          */
-        for (int i = workingValues.size() - 1;
-                i >= 0;
-                i--) {
+        for (long place = 1; maximum / place > 0; place *= 10) {
 
-            int value = workingValues.get(i);
+            int currentPlace = (int) place;
 
-            int digit =
-                    (value / currentPlace) % 10;
+            int[] counts = new int[10];
 
-            int outputIndex =
-                    counts[digit] - 1;
+            // Count each digit from 0 through 9.
+            for (int value : workingValues) {
+                int digit = (value / currentPlace) % 10;
 
-            outputValues.set(
-                outputIndex,
-                value
-            );
+                counts[digit]++;
+            }
 
-            counts[digit]--;
+            // Convert counts into output positions.
+            for (int digit = 1; digit < counts.length; digit++) {
 
-            final List<Integer> currentInput =
-                    new ArrayList<>(
-                        workingValues
-                    );
+                counts[digit] += counts[digit - 1];
+            }
 
-            final List<Integer> currentOutput =
-                    new ArrayList<>(
-                        outputValues
-                    );
+            List<Integer> outputValues = new ArrayList<>(
+                    Collections.nCopies(
+                            workingValues.size(),
+                            null));
 
-            final int displayedPlace =
-                    currentPlace;
+            /*
+             * Work backward to preserve the order
+             * of values with matching digits.
+             */
+            for (int i = workingValues.size() - 1; i >= 0; i--) {
 
-            timeline.getKeyFrames().add(
+                int value = workingValues.get(i);
+
+                int digit = (value / currentPlace) % 10;
+
+                int outputIndex = counts[digit] - 1;
+
+                outputValues.set(
+                        outputIndex,
+                        value);
+
+                counts[digit]--;
+
+                final List<Integer> currentInput = new ArrayList<>(
+                        workingValues);
+
+                final List<Integer> currentOutput = new ArrayList<>(
+                        outputValues);
+
+                final int displayedPlace = currentPlace;
+
+                timeline.getKeyFrames().add(
+                        new KeyFrame(
+                                Duration.millis(elapsedTime),
+                                e -> plotRadixGraphs(
+                                        currentInput,
+                                        currentOutput,
+                                        displayedPlace)));
+
+                elapsedTime += delay;
+            }
+
+            // The output becomes the input for the next digit.
+            workingValues = new ArrayList<>(outputValues);
+        }
+
+        final List<Integer> sortedValues = new ArrayList<>(workingValues);
+
+        final Map<Integer, Color> finishedColors = new HashMap<>();
+
+        for (int i = 0; i < sortedValues.size(); i++) {
+            finishedColors.put(
+                    i,
+                    Color.FORESTGREEN);
+        }
+
+        // Display the completed array in green.
+        timeline.getKeyFrames().add(
                 new KeyFrame(
-                    Duration.millis(elapsedTime),
-                    e -> plotRadixGraphs(
-                        currentInput,
-                        currentOutput,
-                        displayedPlace
-                    )
-                )
-            );
+                        Duration.millis(elapsedTime),
+                        e -> plotValues(
+                                sortedValues,
+                                finishedColors)));
+
+        timeline.setOnFinished(e -> {
+            values.clear();
+            values.addAll(sortedValues);
+        });
+
+        timeline.play();
+    }
+
+    private void bucketAlgo(List<Integer> values) {
+        if (values.size() < 2) {
+            return;
+        }
+
+        // Your current bar graph expects non-negative values.
+        for (int value : values) {
+            if (value < 0) {
+                throw new IllegalArgumentException(
+                        "Bucket sort requires non-negative integers.");
+            }
+        }
+
+        Timeline timeline = new Timeline();
+
+        double elapsedTime = 0;
+        double delay = 500;
+
+        int minimum = Collections.min(values);
+        int maximum = Collections.max(values);
+
+        /*
+         * Use approximately the square root of the
+         * number of values as the number of buckets.
+         */
+        int bucketCount = Math.max(
+                1,
+                (int) Math.ceil(
+                        Math.sqrt(values.size())));
+
+        double bucketWidth = Math.max(
+                1.0,
+                ((double) maximum - minimum + 1)
+                        / bucketCount);
+
+        List<List<Integer>> buckets = new ArrayList<>();
+
+        for (int i = 0; i < bucketCount; i++) {
+            buckets.add(new ArrayList<>());
+        }
+
+        // Display the original array first.
+        final List<Integer> initialValues = new ArrayList<>(values);
+
+        timeline.getKeyFrames().add(
+                new KeyFrame(
+                        Duration.millis(elapsedTime),
+                        e -> plotValues(
+                                initialValues,
+                                Collections.emptyMap())));
+
+        elapsedTime += delay;
+
+        // Place each value into its appropriate bucket.
+        for (int value : values) {
+            int bucketIndex = (int) ((value - minimum) / bucketWidth);
+
+            // Protect against rounding at the maximum value.
+            bucketIndex = Math.min(
+                    bucketIndex,
+                    bucketCount - 1);
+
+            buckets.get(bucketIndex).add(value);
+
+            addBucketFrame(
+                    timeline,
+                    buckets,
+                    elapsedTime);
 
             elapsedTime += delay;
         }
 
-        // The output becomes the input for the next digit.
-        workingValues =
-                new ArrayList<>(outputValues);
+        // Sort each individual bucket.
+        for (List<Integer> bucket : buckets) {
+            if (bucket.size() > 1) {
+                Collections.sort(bucket);
+
+                addBucketFrame(
+                        timeline,
+                        buckets,
+                        elapsedTime);
+
+                elapsedTime += delay;
+            }
+        }
+
+        /*
+         * Reconstruct the array by visiting the
+         * buckets from left to right.
+         */
+        List<Integer> reconstructedValues = new ArrayList<>(values);
+
+        int writeIndex = 0;
+
+        for (List<Integer> bucket : buckets) {
+            for (int value : bucket) {
+                reconstructedValues.set(
+                        writeIndex,
+                        value);
+
+                final List<Integer> currentValues = new ArrayList<>(
+                        reconstructedValues);
+
+                final Map<Integer, Color> sortedColors = new HashMap<>();
+
+                // Every completed position stays green.
+                for (int i = 0; i <= writeIndex; i++) {
+                    sortedColors.put(
+                            i,
+                            Color.FORESTGREEN);
+                }
+
+                timeline.getKeyFrames().add(
+                        new KeyFrame(
+                                Duration.millis(elapsedTime),
+                                e -> plotValues(
+                                        currentValues,
+                                        sortedColors)));
+
+                elapsedTime += delay;
+                writeIndex++;
+            }
+        }
+
+        final List<Integer> sortedValues = new ArrayList<>(
+                reconstructedValues);
+
+        timeline.setOnFinished(e -> {
+            values.clear();
+            values.addAll(sortedValues);
+        });
+
+        timeline.play();
+    }
+private void heapAlgo(List<Integer> values) {
+    if (values.size() < 2) {
+        return;
     }
 
-    final List<Integer> sortedValues =
-            new ArrayList<>(workingValues);
+    Timeline timeline = new Timeline();
 
-    final Map<Integer, Color> finishedColors =
-            new HashMap<>();
+    double delay = 500;
+    double[] elapsedTime = {0};
 
-    for (int i = 0; i < sortedValues.size(); i++) {
-        finishedColors.put(
+    List<Integer> workingValues =
+            new ArrayList<>(values);
+
+    Set<Integer> sortedIndices =
+            new HashSet<>();
+
+    int size = workingValues.size();
+
+    // Build the initial max heap.
+    for (int i = size / 2 - 1; i >= 0; i--) {
+        heapifyFrames(
+            workingValues,
+            size,
             i,
-            Color.FORESTGREEN
+            timeline,
+            elapsedTime,
+            delay,
+            sortedIndices
         );
     }
 
-    // Display the completed array in green.
-    timeline.getKeyFrames().add(
-        new KeyFrame(
-            Duration.millis(elapsedTime),
-            e -> plotValues(
-                sortedValues,
-                finishedColors
-            )
-        )
+    /*
+     * Move the largest value at index 0
+     * to the end of the unsorted section.
+     */
+    for (int end = size - 1; end > 0; end--) {
+        addHeapFrame(
+            workingValues,
+            timeline,
+            elapsedTime,
+            delay,
+            sortedIndices,
+            0,
+            end
+        );
+
+        Collections.swap(
+            workingValues,
+            0,
+            end
+        );
+
+        // The value at end is now permanently sorted.
+        sortedIndices.add(end);
+
+        addHeapFrame(
+            workingValues,
+            timeline,
+            elapsedTime,
+            delay,
+            sortedIndices,
+            0,
+            -1
+        );
+
+        // Repair the remaining heap.
+        heapifyFrames(
+            workingValues,
+            end,
+            0,
+            timeline,
+            elapsedTime,
+            delay,
+            sortedIndices
+        );
+    }
+
+    // The final remaining value is also sorted.
+    sortedIndices.add(0);
+
+    addHeapFrame(
+        workingValues,
+        timeline,
+        elapsedTime,
+        delay,
+        sortedIndices,
+        -1,
+        -1
     );
+
+    final List<Integer> sortedValues =
+            new ArrayList<>(workingValues);
 
     timeline.setOnFinished(e -> {
         values.clear();
@@ -1372,44 +1583,197 @@ private void radixAlgo(List<Integer> values) {
 
     timeline.play();
 }
-private void plotRadixGraphs(
-        List<Integer> inputValues,
-        List<Integer> outputValues,
-        int place) {
+private void heapifyFrames(
+        List<Integer> values,
+        int heapSize,
+        int rootIndex,
+        Timeline timeline,
+        double[] elapsedTime,
+        double delay,
+        Set<Integer> sortedIndices) {
 
-    plotTwoGraphs(
-        inputValues,
-        outputValues
-    );
+    int currentRoot = rootIndex;
 
-    String digitName;
+    while (true) {
+        int largestIndex = currentRoot;
 
-    if (place == 1) {
-        digitName = "Ones";
-    } else if (place == 10) {
-        digitName = "Tens";
-    } else if (place == 100) {
-        digitName = "Hundreds";
-    } else if (place == 1000) {
-        digitName = "Thousands";
-    } else {
-        digitName = "Place " + place;
+        int leftChild =
+                2 * currentRoot + 1;
+
+        int rightChild =
+                2 * currentRoot + 2;
+
+        // Compare the root with its left child.
+        if (leftChild < heapSize) {
+            addHeapFrame(
+                values,
+                timeline,
+                elapsedTime,
+                delay,
+                sortedIndices,
+                largestIndex,
+                leftChild
+            );
+
+            if (values.get(leftChild)
+                    > values.get(largestIndex)) {
+
+                largestIndex = leftChild;
+            }
+        }
+
+        // Compare the current largest with the right child.
+        if (rightChild < heapSize) {
+            addHeapFrame(
+                values,
+                timeline,
+                elapsedTime,
+                delay,
+                sortedIndices,
+                largestIndex,
+                rightChild
+            );
+
+            if (values.get(rightChild)
+                    > values.get(largestIndex)) {
+
+                largestIndex = rightChild;
+            }
+        }
+
+        // The root is already larger than both children.
+        if (largestIndex == currentRoot) {
+            break;
+        }
+
+        Collections.swap(
+            values,
+            currentRoot,
+            largestIndex
+        );
+
+        // Display the completed swap.
+        addHeapFrame(
+            values,
+            timeline,
+            elapsedTime,
+            delay,
+            sortedIndices,
+            currentRoot,
+            largestIndex
+        );
+
+        /*
+         * Continue repairing the heap from
+         * the position where the root moved.
+         */
+        currentRoot = largestIndex;
+    }
+}
+private void addHeapFrame(
+        List<Integer> values,
+        Timeline timeline,
+        double[] elapsedTime,
+        double delay,
+        Set<Integer> sortedIndices,
+        int firstIndex,
+        int secondIndex) {
+
+    final List<Integer> currentValues =
+            new ArrayList<>(values);
+
+    final Map<Integer, Color> currentColors =
+            new HashMap<>();
+
+    if (firstIndex >= 0) {
+        currentColors.put(
+            firstIndex,
+            Color.ROYALBLUE
+        );
     }
 
-    Text placeText = new Text(
-        "Sorting by: " + digitName
+    if (secondIndex >= 0) {
+        currentColors.put(
+            secondIndex,
+            Color.NAVY
+        );
+    }
+
+    // Sorted positions override comparison colors.
+    for (int sortedIndex : sortedIndices) {
+        currentColors.put(
+            sortedIndex,
+            Color.FORESTGREEN
+        );
+    }
+
+    timeline.getKeyFrames().add(
+        new KeyFrame(
+            Duration.millis(elapsedTime[0]),
+            e -> plotValues(
+                currentValues,
+                currentColors
+            )
+        )
     );
 
-    placeText.setFont(
-        new Font("Consolas", 20)
-    );
-
-    placeText.setFill(Color.BLACK);
-    placeText.setX(40);
-    placeText.setY(40);
-
-    canvas.getChildren().add(placeText);
+    elapsedTime[0] += delay;
 }
+    private void addBucketFrame(
+            Timeline timeline,
+            List<List<Integer>> buckets,
+            double elapsedTime) {
+
+        final List<List<Integer>> currentBuckets = new ArrayList<>();
+
+        // Make a deep copy so later changes don't affect this frame.
+        for (List<Integer> bucket : buckets) {
+            currentBuckets.add(
+                    new ArrayList<>(bucket));
+        }
+
+        timeline.getKeyFrames().add(
+                new KeyFrame(
+                        Duration.millis(elapsedTime),
+                        e -> plotGroups(currentBuckets)));
+    }
+
+    private void plotRadixGraphs(
+            List<Integer> inputValues,
+            List<Integer> outputValues,
+            int place) {
+
+        plotTwoGraphs(
+                inputValues,
+                outputValues);
+
+        String digitName;
+
+        if (place == 1) {
+            digitName = "Ones";
+        } else if (place == 10) {
+            digitName = "Tens";
+        } else if (place == 100) {
+            digitName = "Hundreds";
+        } else if (place == 1000) {
+            digitName = "Thousands";
+        } else {
+            digitName = "Place " + place;
+        }
+
+        Text placeText = new Text(
+                "Sorting by: " + digitName);
+
+        placeText.setFont(
+                new Font("Consolas", 20));
+
+        placeText.setFill(Color.BLACK);
+        placeText.setX(40);
+        placeText.setY(40);
+
+        canvas.getChildren().add(placeText);
+    }
+
     private boolean hasSplittableGroup(
             List<List<Integer>> groups) {
 
