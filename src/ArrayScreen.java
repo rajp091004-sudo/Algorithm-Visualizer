@@ -24,7 +24,10 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.text.Text;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class ArrayScreen {
 
@@ -126,10 +129,23 @@ public class ArrayScreen {
             mergeAlgo(values);
         });
         setButtonSize(quickSort);
+        quickSort.setOnAction(e -> {
+            quickAlgo(values);
+        });
         setButtonSize(heapSort);
+
         setButtonSize(shellSort);
+        shellSort.setOnAction(e -> {
+            shellAlgo(values);
+        });
         setButtonSize(countingSort);
+        countingSort.setOnAction(e -> {
+            countingAlgo(values);
+        });
         setButtonSize(radixSort);
+        radixSort.setOnAction(e -> {
+            radixAlgo(values);
+        });
         setButtonSize(bucketSort);
         setButtonSize(backButton);
 
@@ -726,6 +742,674 @@ public class ArrayScreen {
         timeline.play();
     }
 
+    private void quickAlgo(List<Integer> values) {
+        if (values.size() < 2) {
+            return;
+        }
+
+        Timeline timeline = new Timeline();
+
+        double delay = 500;
+        double[] elapsedTime = { 0 };
+
+        Set<Integer> sortedIndices = new HashSet<>();
+
+        quickSortFrames(
+                values,
+                0,
+                values.size() - 1,
+                timeline,
+                elapsedTime,
+                delay,
+                sortedIndices);
+
+        timeline.play();
+    }
+
+    private void quickSortFrames(
+            List<Integer> values,
+            int low,
+            int high,
+            Timeline timeline,
+            double[] elapsedTime,
+            double delay,
+            Set<Integer> sortedIndices) {
+
+        if (low > high) {
+            return;
+        }
+
+        // A section containing one value is already sorted.
+        if (low == high) {
+            sortedIndices.add(low);
+
+            addQuickFrame(
+                    values,
+                    timeline,
+                    elapsedTime,
+                    delay,
+                    sortedIndices,
+                    -1,
+                    -1,
+                    -1);
+
+            return;
+        }
+
+        int pivotIndex = partitionFrames(
+                values,
+                low,
+                high,
+                timeline,
+                elapsedTime,
+                delay,
+                sortedIndices);
+
+        quickSortFrames(
+                values,
+                low,
+                pivotIndex - 1,
+                timeline,
+                elapsedTime,
+                delay,
+                sortedIndices);
+
+        quickSortFrames(
+                values,
+                pivotIndex + 1,
+                high,
+                timeline,
+                elapsedTime,
+                delay,
+                sortedIndices);
+    }
+
+    private int partitionFrames(
+            List<Integer> values,
+            int low,
+            int high,
+            Timeline timeline,
+            double[] elapsedTime,
+            double delay,
+            Set<Integer> sortedIndices) {
+
+        // Select a random pivot.
+        int randomPivotIndex = ThreadLocalRandom.current()
+                .nextInt(low, high + 1);
+
+        // Display the randomly selected pivot in bright green.
+        addQuickFrame(
+                values,
+                timeline,
+                elapsedTime,
+                delay,
+                sortedIndices,
+                randomPivotIndex,
+                -1,
+                -1);
+
+        /*
+         * Move the pivot to the end of the current section.
+         * This makes the partitioning process easier.
+         */
+        Collections.swap(
+                values,
+                randomPivotIndex,
+                high);
+
+        int pivotValue = values.get(high);
+
+        // Display the pivot in its temporary position.
+        addQuickFrame(
+                values,
+                timeline,
+                elapsedTime,
+                delay,
+                sortedIndices,
+                high,
+                randomPivotIndex,
+                -1);
+
+        int smallerIndex = low - 1;
+
+        for (int currentIndex = low; currentIndex < high; currentIndex++) {
+
+            /*
+             * Show the value being compared with the pivot.
+             *
+             * Pivot: bright green
+             * Current value: navy
+             * Smaller-value boundary: royal blue
+             */
+            addQuickFrame(
+                    values,
+                    timeline,
+                    elapsedTime,
+                    delay,
+                    sortedIndices,
+                    high,
+                    currentIndex,
+                    smallerIndex);
+
+            if (values.get(currentIndex) <= pivotValue) {
+                smallerIndex++;
+
+                if (smallerIndex != currentIndex) {
+                    Collections.swap(
+                            values,
+                            smallerIndex,
+                            currentIndex);
+                }
+
+                // Display the completed swap.
+                addQuickFrame(
+                        values,
+                        timeline,
+                        elapsedTime,
+                        delay,
+                        sortedIndices,
+                        high,
+                        currentIndex,
+                        smallerIndex);
+            }
+        }
+
+        int finalPivotIndex = smallerIndex + 1;
+
+        Collections.swap(
+                values,
+                finalPivotIndex,
+                high);
+
+        // The pivot is now permanently sorted.
+        sortedIndices.add(finalPivotIndex);
+
+        addQuickFrame(
+                values,
+                timeline,
+                elapsedTime,
+                delay,
+                sortedIndices,
+                -1,
+                -1,
+                -1);
+
+        return finalPivotIndex;
+    }
+
+    private void addQuickFrame(
+            List<Integer> values,
+            Timeline timeline,
+            double[] elapsedTime,
+            double delay,
+            Set<Integer> sortedIndices,
+            int pivotIndex,
+            int comparisonIndex,
+            int boundaryIndex) {
+
+        final List<Integer> currentValues = new ArrayList<>(values);
+
+        final Map<Integer, Color> currentColors = new HashMap<>();
+
+        // Permanently sorted positions.
+        for (int sortedIndex : sortedIndices) {
+            currentColors.put(
+                    sortedIndex,
+                    Color.FORESTGREEN);
+        }
+
+        // Current value being compared.
+        if (comparisonIndex >= 0) {
+            currentColors.put(
+                    comparisonIndex,
+                    Color.NAVY);
+        }
+
+        // Boundary between smaller and larger values.
+        if (boundaryIndex >= 0) {
+            currentColors.put(
+                    boundaryIndex,
+                    Color.ROYALBLUE);
+        }
+
+        // The active pivot overrides the other colors.
+        if (pivotIndex >= 0) {
+            currentColors.put(
+                    pivotIndex,
+                    Color.LIMEGREEN);
+        }
+
+        timeline.getKeyFrames().add(
+                new KeyFrame(
+                        Duration.millis(elapsedTime[0]),
+                        e -> {
+                            plotValues(
+                                    currentValues,
+                                    currentColors);
+                        }));
+
+        elapsedTime[0] += delay;
+    }
+
+    private void shellAlgo(List<Integer> values) {
+        if (values.size() < 2) {
+            return;
+        }
+
+        Timeline timeline = new Timeline();
+
+        double elapsedTime = 0;
+        double delay = 500;
+
+        // Used to calculate the sorting steps before animating them.
+        List<Integer> workingValues = new ArrayList<>(values);
+
+        for (int gap = workingValues.size() / 2; gap > 0; gap /= 2) {
+
+            for (int i = gap; i < workingValues.size(); i++) {
+                int temp = workingValues.get(i);
+                int j = i;
+
+                while (j >= gap) {
+                    int leftIndex = j - gap;
+                    int rightIndex = j;
+
+                    List<Integer> comparisonState = new ArrayList<>(workingValues);
+
+                    Map<Integer, Color> comparisonHighlights = new HashMap<>();
+
+                    comparisonHighlights.put(leftIndex, Color.RED);
+                    comparisonHighlights.put(rightIndex, Color.ORANGE);
+
+                    double comparisonTime = elapsedTime;
+
+                    timeline.getKeyFrames().add(
+                            new KeyFrame(
+                                    Duration.millis(comparisonTime),
+                                    e -> {
+                                        values.clear();
+                                        values.addAll(comparisonState);
+
+                                        plotValues(
+                                                values,
+                                                comparisonHighlights);
+                                    }));
+
+                    elapsedTime += delay;
+
+                    if (workingValues.get(leftIndex) <= temp) {
+                        break;
+                    }
+
+                    // Shift the larger value to the right.
+                    workingValues.set(
+                            rightIndex,
+                            workingValues.get(leftIndex));
+
+                    List<Integer> shiftedState = new ArrayList<>(workingValues);
+
+                    Map<Integer, Color> shiftedHighlights = new HashMap<>();
+
+                    shiftedHighlights.put(leftIndex, Color.RED);
+                    shiftedHighlights.put(rightIndex, Color.ORANGE);
+
+                    double shiftTime = elapsedTime;
+
+                    timeline.getKeyFrames().add(
+                            new KeyFrame(
+                                    Duration.millis(shiftTime),
+                                    e -> {
+                                        values.clear();
+                                        values.addAll(shiftedState);
+
+                                        plotValues(
+                                                values,
+                                                shiftedHighlights);
+                                    }));
+
+                    elapsedTime += delay;
+                    j -= gap;
+                }
+
+                // Insert the selected value into its new position.
+                workingValues.set(j, temp);
+
+                List<Integer> insertedState = new ArrayList<>(workingValues);
+
+                Map<Integer, Color> insertedHighlights = new HashMap<>();
+
+                /*
+                 * During the final gap pass, the section from
+                 * index 0 through i is sorted.
+                 */
+                if (gap == 1) {
+                    for (int sortedIndex = 0; sortedIndex <= i; sortedIndex++) {
+
+                        insertedHighlights.put(
+                                sortedIndex,
+                                Color.GREEN);
+                    }
+                } else {
+                    insertedHighlights.put(j, Color.PURPLE);
+                }
+
+                double insertionTime = elapsedTime;
+
+                timeline.getKeyFrames().add(
+                        new KeyFrame(
+                                Duration.millis(insertionTime),
+                                e -> {
+                                    values.clear();
+                                    values.addAll(insertedState);
+
+                                    plotValues(
+                                            values,
+                                            insertedHighlights);
+                                }));
+
+                elapsedTime += delay;
+            }
+        }
+
+        timeline.play();
+    }
+
+    private void countingAlgo(List<Integer> values) {
+        if (values.size() < 2) {
+            return;
+        }
+
+        // Counting-array indices cannot represent negative numbers.
+        for (int value : values) {
+            if (value < 0) {
+                throw new IllegalArgumentException(
+                        "Counting sort requires non-negative integers.");
+            }
+        }
+
+        Timeline timeline = new Timeline();
+
+        double elapsedTime = 0;
+        double delay = 500;
+
+        int maximum = Collections.max(values);
+
+        // Create [0, 0, 0, ...] from index 0 through maximum.
+        List<Integer> counts = new ArrayList<>();
+
+        for (int i = 0; i <= maximum; i++) {
+            counts.add(0);
+        }
+
+        /*
+         * Display the original array and the empty
+         * counting array before counting begins.
+         */
+        final List<Integer> initialValues = new ArrayList<>(values);
+
+        final List<Integer> initialCounts = new ArrayList<>(counts);
+
+        timeline.getKeyFrames().add(
+                new KeyFrame(
+                        Duration.millis(elapsedTime),
+                        e -> plotTwoGraphs(
+                                initialValues,
+                                initialCounts)));
+
+        elapsedTime += delay;
+
+        // Count each number in the original array.
+        for (int value : values) {
+            counts.set(
+                    value,
+                    counts.get(value) + 1);
+
+            final List<Integer> currentValues = new ArrayList<>(values);
+
+            final List<Integer> currentCounts = new ArrayList<>(counts);
+
+            timeline.getKeyFrames().add(
+                    new KeyFrame(
+                            Duration.millis(elapsedTime),
+                            e -> plotTwoGraphs(
+                                    currentValues,
+                                    currentCounts)));
+
+            elapsedTime += delay;
+        }
+
+        /*
+         * Reconstruct the sorted array.
+         * Start with a copy so each frame can show
+         * the sorted portion replacing the old values.
+         */
+        List<Integer> reconstructedValues = new ArrayList<>(values);
+
+        int writeIndex = 0;
+
+        for (int value = 0; value < counts.size(); value++) {
+
+            int appearances = counts.get(value);
+
+            for (int amountInserted = 0; amountInserted < appearances; amountInserted++) {
+
+                reconstructedValues.set(
+                        writeIndex,
+                        value);
+
+                final List<Integer> currentValues = new ArrayList<>(
+                        reconstructedValues);
+
+                final List<Integer> currentCounts = new ArrayList<>(counts);
+
+                timeline.getKeyFrames().add(
+                        new KeyFrame(
+                                Duration.millis(elapsedTime),
+                                e -> plotTwoGraphs(
+                                        currentValues,
+                                        currentCounts)));
+
+                elapsedTime += delay;
+                writeIndex++;
+            }
+        }
+
+        final List<Integer> sortedValues = new ArrayList<>(
+                reconstructedValues);
+
+        timeline.setOnFinished(e -> {
+            values.clear();
+            values.addAll(sortedValues);
+        });
+
+        timeline.play();
+    }
+private void radixAlgo(List<Integer> values) {
+    if (values.size() < 2) {
+        return;
+    }
+
+    // This version only supports non-negative integers.
+    for (int value : values) {
+        if (value < 0) {
+            throw new IllegalArgumentException(
+                "Radix sort requires non-negative integers."
+            );
+        }
+    }
+
+    Timeline timeline = new Timeline();
+
+    double elapsedTime = 0;
+    double delay = 500;
+
+    List<Integer> workingValues =
+            new ArrayList<>(values);
+
+    int maximum = Collections.max(workingValues);
+
+    /*
+     * place = 1    → ones digit
+     * place = 10   → tens digit
+     * place = 100  → hundreds digit
+     */
+    for (long place = 1;
+            maximum / place > 0;
+            place *= 10) {
+
+        int currentPlace = (int) place;
+
+        int[] counts = new int[10];
+
+        // Count each digit from 0 through 9.
+        for (int value : workingValues) {
+            int digit =
+                    (value / currentPlace) % 10;
+
+            counts[digit]++;
+        }
+
+        // Convert counts into output positions.
+        for (int digit = 1;
+                digit < counts.length;
+                digit++) {
+
+            counts[digit] +=
+                    counts[digit - 1];
+        }
+
+        List<Integer> outputValues =
+                new ArrayList<>(
+                    Collections.nCopies(
+                        workingValues.size(),
+                        null
+                    )
+                );
+
+        /*
+         * Work backward to preserve the order
+         * of values with matching digits.
+         */
+        for (int i = workingValues.size() - 1;
+                i >= 0;
+                i--) {
+
+            int value = workingValues.get(i);
+
+            int digit =
+                    (value / currentPlace) % 10;
+
+            int outputIndex =
+                    counts[digit] - 1;
+
+            outputValues.set(
+                outputIndex,
+                value
+            );
+
+            counts[digit]--;
+
+            final List<Integer> currentInput =
+                    new ArrayList<>(
+                        workingValues
+                    );
+
+            final List<Integer> currentOutput =
+                    new ArrayList<>(
+                        outputValues
+                    );
+
+            final int displayedPlace =
+                    currentPlace;
+
+            timeline.getKeyFrames().add(
+                new KeyFrame(
+                    Duration.millis(elapsedTime),
+                    e -> plotRadixGraphs(
+                        currentInput,
+                        currentOutput,
+                        displayedPlace
+                    )
+                )
+            );
+
+            elapsedTime += delay;
+        }
+
+        // The output becomes the input for the next digit.
+        workingValues =
+                new ArrayList<>(outputValues);
+    }
+
+    final List<Integer> sortedValues =
+            new ArrayList<>(workingValues);
+
+    final Map<Integer, Color> finishedColors =
+            new HashMap<>();
+
+    for (int i = 0; i < sortedValues.size(); i++) {
+        finishedColors.put(
+            i,
+            Color.FORESTGREEN
+        );
+    }
+
+    // Display the completed array in green.
+    timeline.getKeyFrames().add(
+        new KeyFrame(
+            Duration.millis(elapsedTime),
+            e -> plotValues(
+                sortedValues,
+                finishedColors
+            )
+        )
+    );
+
+    timeline.setOnFinished(e -> {
+        values.clear();
+        values.addAll(sortedValues);
+    });
+
+    timeline.play();
+}
+private void plotRadixGraphs(
+        List<Integer> inputValues,
+        List<Integer> outputValues,
+        int place) {
+
+    plotTwoGraphs(
+        inputValues,
+        outputValues
+    );
+
+    String digitName;
+
+    if (place == 1) {
+        digitName = "Ones";
+    } else if (place == 10) {
+        digitName = "Tens";
+    } else if (place == 100) {
+        digitName = "Hundreds";
+    } else if (place == 1000) {
+        digitName = "Thousands";
+    } else {
+        digitName = "Place " + place;
+    }
+
+    Text placeText = new Text(
+        "Sorting by: " + digitName
+    );
+
+    placeText.setFont(
+        new Font("Consolas", 20)
+    );
+
+    placeText.setFill(Color.BLACK);
+    placeText.setX(40);
+    placeText.setY(40);
+
+    canvas.getChildren().add(placeText);
+}
     private boolean hasSplittableGroup(
             List<List<Integer>> groups) {
 
