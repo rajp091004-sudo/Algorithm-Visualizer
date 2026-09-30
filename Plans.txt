@@ -1,4 +1,0 @@
-make counting show indexes 
-add a reccomendation system 
-create  tree in order to do heap sort 
-add radix and bucket 

@@ -3,7 +3,6 @@ import java.util.List;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
-import javafx.animation.PauseTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -13,14 +12,10 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
-import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import javafx.scene.chart.BarChart;
-import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
 import javafx.scene.text.Text;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,6 +23,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 
 public class ArrayScreen {
 
@@ -39,6 +36,9 @@ public class ArrayScreen {
     NumberAxis yAxis = new NumberAxis();
 
     public Scene create(Stage stage, Scene selectScene) {
+
+        Scene scene = new Scene(layout, 1280, 700);
+        scene.getStylesheets().add("style.css");
 
         Button createArray = new Button("Create Array");
         setButtonSize(createArray);
@@ -62,36 +62,21 @@ public class ArrayScreen {
 
         Button clearArray = new Button("Clear Canvas");
         setButtonSize(clearArray);
-
         clearArray.setOnAction(e -> {
             values.clear();
             canvas.getChildren().clear();
         });
 
-        Button bubbleSort = new Button("Bubble Sort"),
-                selectionSort = new Button("Selection Sort"),
-                insertionSort = new Button("Insertion Sort"),
-                mergeSort = new Button("Merge Sort"),
-                quickSort = new Button("Quick Sort"),
-                heapSort = new Button("Heap Sort"),
-                shellSort = new Button("Shell Sort"),
-                countingSort = new Button("Counting Sort"),
-                radixSort = new Button("Radix Sort"),
-                bucketSort = new Button("Bucket Sort"),
-                backButton = new Button("Back");
-
-        Button stepByStep = new Button("View Step By Step");
-        setButtonSize(stepByStep);
-
         Button selectScreenButton = new Button("Select Screen");
         setButtonSize(selectScreenButton);
-
         selectScreenButton.setOnAction(e -> {
             stage.setScene(selectScene);
         });
 
-        TilePane menu = new TilePane();
+        Button Search = new Button("Search");
+        setButtonSize(Search);
 
+        TilePane menu = new TilePane();
         menu.setPrefColumns(5);
         menu.setTileAlignment(Pos.CENTER);
         menu.setAlignment(Pos.CENTER);
@@ -99,61 +84,78 @@ public class ArrayScreen {
         menu.setHgap(20);
         menu.setVgap(10);
         menu.setPadding(new Insets(20, 0, 30, 0));
-
         menu.getChildren().addAll(
                 createArray,
                 randomize,
                 sort,
-                stepByStep,
+                Search,
                 clearArray,
                 selectScreenButton);
         TilePane sortMenu = new TilePane();
         sortMenu.setPrefColumns(5);
 
+        // Sorting Algorithms
+        Button bubbleSort = new Button("Bubble Sort");
         setButtonSize(bubbleSort);
         bubbleSort.setOnAction(e -> {
             bubbleAlgo(values);
         });
 
+        Button selectionSort = new Button("Selection Sort");
         setButtonSize(selectionSort);
         selectionSort.setOnAction(e -> {
             selectionAlgo(values);
         });
 
+        Button insertionSort = new Button("Insertion Sort");
         setButtonSize(insertionSort);
         insertionSort.setOnAction(e -> {
             insertionAlgo(values);
         });
+
+        Button mergeSort = new Button("Merge Sort");
         setButtonSize(mergeSort);
         mergeSort.setOnAction(e -> {
             mergeAlgo(values);
         });
+
+        Button quickSort = new Button("Quick Sort");
         setButtonSize(quickSort);
         quickSort.setOnAction(e -> {
             quickAlgo(values);
         });
+
+        Button heapSort = new Button("Heap Sort");
         setButtonSize(heapSort);
         heapSort.setOnAction(e -> {
             heapAlgo(values);
         });
 
+        Button shellSort = new Button("Shell Sort");
         setButtonSize(shellSort);
         shellSort.setOnAction(e -> {
             shellAlgo(values);
         });
+
+        Button countingSort = new Button("Counting Sort");
         setButtonSize(countingSort);
         countingSort.setOnAction(e -> {
             countingAlgo(values);
         });
+
+        Button radixSort = new Button("Radix Sort");
         setButtonSize(radixSort);
         radixSort.setOnAction(e -> {
             radixAlgo(values);
         });
+
+        Button bucketSort = new Button("Bucket Sort");
         setButtonSize(bucketSort);
         bucketSort.setOnAction(e -> {
             bucketAlgo(values);
         });
 
+        Button backButton = new Button("Back");
         setButtonSize(backButton);
         backButton.setOnAction(e -> {
             layout.setBottom(menu);
@@ -172,15 +174,154 @@ public class ArrayScreen {
                 bucketSort,
                 backButton);
 
+        // Searching Algorithms
+        TilePane searchMenu = new TilePane();
+
+        searchMenu.setPrefColumns(3);
+        TextField searchInput = new TextField();
+        searchInput.setPromptText("Enter value to search");
+        searchInput.setMinSize(250, 75);
+        searchInput.setMaxSize(250, 75);
+        searchInput.setPrefSize(250, 75);
+
+        TextField searchResult = new TextField();
+        searchResult.setPromptText("Search Result");
+        searchResult.setEditable(false);
+        searchResult.setMinSize(250, 75);
+        searchResult.setMaxSize(250, 75);
+        searchResult.setPrefSize(250, 75);
+
+        Button linearSearch = new Button("Linear Search");
+        setButtonSize(linearSearch, false);
+        linearSearch.setOnAction(e -> {
+            int result = linearAlgo(
+                    values,
+                    Integer.parseInt(searchInput.getText()));
+
+            if (result == -1) {
+                searchResult.setText("Not Found");
+            } else {
+                searchResult.setText("Found at index: " + result);
+            }
+        });
+        Button sentinelSearch = new Button("Sentinel Search");
+        setButtonSize(sentinelSearch, false);
+        sentinelSearch.setOnAction(e -> {
+            int result = sentinelAlgo(values, Integer.parseInt(searchInput.getText()));
+            if (result == -1) {
+                searchResult.setText("Not Found");
+            } else {
+                searchResult.setText("Found at index: " + result);
+            }
+        });
+
+        Button randomSearch = new Button("Random Search");
+        setButtonSize(randomSearch, false);
+
+        randomSearch.setOnAction(e -> {
+
+            int result = randomAlgo(
+                    values,
+                    Integer.parseInt(searchInput.getText()));
+
+            if (result == -1) {
+                searchResult.setText("Not Found");
+            } else {
+                searchResult.setText("Found at index: " + result);
+            }
+        });
+
+        Button bidirectionalSearch = new Button("Bidirectional Search");
+        setButtonSize(bidirectionalSearch, false);
+        bidirectionalSearch.setOnAction(e -> {
+
+            int result = bidirectionalAlgo(
+                    values,
+                    Integer.parseInt(searchInput.getText()));
+
+            if (result == -1) {
+                searchResult.setText("Not Found");
+            } else {
+                searchResult.setText("Found at index: " + result);
+            }
+        });
+
+        Button binarySearch = new Button("Binary Search");
+        setButtonSize(binarySearch, true);
+
+        binarySearch.setOnAction(e -> {
+
+            int result = binaryAlgo(
+                    values,
+                    Integer.parseInt(searchInput.getText()));
+
+            if (result == -1) {
+                searchResult.setText("Not Found");
+            } else {
+                searchResult.setText("Found at index: " + result);
+            }
+        });
+
+        Button jumpSearch = new Button("Jump Search");
+        setButtonSize(jumpSearch, true);
+
+        jumpSearch.setOnAction(e -> {
+
+            int result = jumpAlgo(
+                    values,
+                    Integer.parseInt(searchInput.getText()));
+
+            if (result == -1) {
+                searchResult.setText("Not Found");
+            } else {
+                searchResult.setText("Found at index: " + result);
+            }
+        });
+
+        Button interpolationSearch = new Button("Interpolation Search");
+        setButtonSize(interpolationSearch, true);
+
+        interpolationSearch.setOnAction(e -> {
+
+            int result = interpolationAlgo(
+                    values,
+                    Integer.parseInt(searchInput.getText()));
+
+            if (result == -1) {
+                searchResult.setText("Not Found");
+            } else {
+                searchResult.setText("Found at index: " + result);
+            }
+        });
+
+        Button backButton2 = new Button("Back");
+        setButtonSize(backButton2, false);
+        backButton2.setOnAction(e -> {
+            layout.setBottom(menu);
+        });
+
         layout.setCenter(canvas);
         layout.setBottom(menu);
 
-        Scene scene = new Scene(layout, 1280, 700);
-        scene.getStylesheets().add("style.css");
+        searchMenu.getChildren().addAll(
+                searchInput,
+                linearSearch,
+                binarySearch,
+                sentinelSearch,
+                randomSearch,
+                searchResult,
+                jumpSearch,
+                interpolationSearch,
+                bidirectionalSearch,
+                backButton2);
+
         sort.setOnAction(e -> {
             layout.setBottom(sortMenu);
         });
 
+        Search.setOnAction(e -> {
+            layout.setBottom(searchMenu);
+        });
         return scene;
     }
 
@@ -188,7 +329,27 @@ public class ArrayScreen {
         button.setMinSize(250, 75);
         button.setMaxSize(250, 75);
         button.setPrefSize(250, 75);
+        
     }
+    private void setButtonSize(Button button, boolean requiresSorted) {
+
+    button.setMinSize(250, 75);
+    button.setMaxSize(250, 75);
+    button.setPrefSize(250, 75);
+
+    Tooltip tooltip;
+
+    if (requiresSorted) {
+        tooltip = new Tooltip("Array must be sorted");
+    } else {
+        tooltip = new Tooltip("Array does not need to be sorted");
+    }
+
+    tooltip.setShowDelay(Duration.millis(100));
+    tooltip.setShowDuration(Duration.seconds(10));
+
+    button.setTooltip(tooltip);
+}
 
     private void plotValues(
             List<Integer> values,
@@ -622,13 +783,11 @@ public class ArrayScreen {
         double delay = 500;
 
         for (int i = 1; i < values.size(); i++) {
-            final int currentI = i;
             int key = values.get(i);
             int j = i - 1;
 
             while (j >= 0 && values.get(j) > key) {
                 values.set(j + 1, values.get(j));
-                final int currentJ = j;
                 final int shiftFrom = j;
                 final int shiftTo = j + 1;
                 final List<Integer> currentValues = new ArrayList<>(values);
@@ -1121,11 +1280,12 @@ public class ArrayScreen {
     }
 
     private void countingAlgo(List<Integer> values) {
+
         if (values.size() < 2) {
             return;
         }
 
-        // Counting-array indices cannot represent negative numbers.
+        // Counting sort requires non-negative integers
         for (int value : values) {
             if (value < 0) {
                 throw new IllegalArgumentException(
@@ -1138,19 +1298,23 @@ public class ArrayScreen {
         double elapsedTime = 0;
         double delay = 500;
 
+        // Find the largest value
         int maximum = Collections.max(values);
 
-        // Create [0, 0, 0, ...] from index 0 through maximum.
+        // --------------------------------
+        // CREATE COUNTING ARRAY
+        // --------------------------------
+
         List<Integer> counts = new ArrayList<>();
 
         for (int i = 0; i <= maximum; i++) {
             counts.add(0);
         }
 
-        /*
-         * Display the original array and the empty
-         * counting array before counting begins.
-         */
+        // --------------------------------
+        // INITIAL FRAME
+        // --------------------------------
+
         final List<Integer> initialValues = new ArrayList<>(values);
 
         final List<Integer> initialCounts = new ArrayList<>(counts);
@@ -1164,8 +1328,13 @@ public class ArrayScreen {
 
         elapsedTime += delay;
 
-        // Count each number in the original array.
+        // --------------------------------
+        // COUNTING PHASE
+        // --------------------------------
+
         for (int value : values) {
+
+            // Increase the count for this value
             counts.set(
                     value,
                     counts.get(value) + 1);
@@ -1184,48 +1353,70 @@ public class ArrayScreen {
             elapsedTime += delay;
         }
 
-        /*
-         * Reconstruct the sorted array.
-         * Start with a copy so each frame can show
-         * the sorted portion replacing the old values.
-         */
-        List<Integer> reconstructedValues = new ArrayList<>(values);
+        // Give the completed counting array
+        // an extra moment on screen
+        elapsedTime += delay;
 
-        int writeIndex = 0;
+        // --------------------------------
+        // RECONSTRUCTION PHASE
+        // --------------------------------
+
+        /*
+         * We are finished with the counting graph.
+         *
+         * Now we construct the sorted array from
+         * scratch and display it using the normal
+         * single graph.
+         */
+
+        List<Integer> reconstructedValues = new ArrayList<>();
 
         for (int value = 0; value < counts.size(); value++) {
 
             int appearances = counts.get(value);
 
-            for (int amountInserted = 0; amountInserted < appearances; amountInserted++) {
+            for (int i = 0; i < appearances; i++) {
 
-                reconstructedValues.set(
-                        writeIndex,
-                        value);
+                // Add the value to the sorted array
+                reconstructedValues.add(value);
 
-                final List<Integer> currentValues = new ArrayList<>(
-                        reconstructedValues);
-
-                final List<Integer> currentCounts = new ArrayList<>(counts);
+                final List<Integer> currentValues = new ArrayList<>(reconstructedValues);
 
                 timeline.getKeyFrames().add(
                         new KeyFrame(
                                 Duration.millis(elapsedTime),
-                                e -> plotTwoGraphs(
+                                e -> plotValues(
                                         currentValues,
-                                        currentCounts)));
+                                        -1,
+                                        -1)));
 
                 elapsedTime += delay;
-                writeIndex++;
             }
         }
 
-        final List<Integer> sortedValues = new ArrayList<>(
-                reconstructedValues);
+        // --------------------------------
+        // FINAL FRAME
+        // --------------------------------
+
+        final List<Integer> sortedValues = new ArrayList<>(reconstructedValues);
+
+        timeline.getKeyFrames().add(
+                new KeyFrame(
+                        Duration.millis(elapsedTime),
+                        e -> plotValues(
+                                sortedValues,
+                                -1,
+                                -1)));
+
+        // --------------------------------
+        // FINISH
+        // --------------------------------
 
         timeline.setOnFinished(e -> {
+
             values.clear();
             values.addAll(sortedValues);
+
         });
 
         timeline.play();
@@ -1483,242 +1674,221 @@ public class ArrayScreen {
 
         timeline.play();
     }
-private void heapAlgo(List<Integer> values) {
-    if (values.size() < 2) {
-        return;
-    }
 
-    Timeline timeline = new Timeline();
-
-    double delay = 500;
-    double[] elapsedTime = {0};
-
-    List<Integer> workingValues =
-            new ArrayList<>(values);
-
-    Set<Integer> sortedIndices =
-            new HashSet<>();
-
-    int size = workingValues.size();
-
-    // Build the initial max heap.
-    for (int i = size / 2 - 1; i >= 0; i--) {
-        heapifyFrames(
-            workingValues,
-            size,
-            i,
-            timeline,
-            elapsedTime,
-            delay,
-            sortedIndices
-        );
-    }
-
-    /*
-     * Move the largest value at index 0
-     * to the end of the unsorted section.
-     */
-    for (int end = size - 1; end > 0; end--) {
-        addHeapFrame(
-            workingValues,
-            timeline,
-            elapsedTime,
-            delay,
-            sortedIndices,
-            0,
-            end
-        );
-
-        Collections.swap(
-            workingValues,
-            0,
-            end
-        );
-
-        // The value at end is now permanently sorted.
-        sortedIndices.add(end);
-
-        addHeapFrame(
-            workingValues,
-            timeline,
-            elapsedTime,
-            delay,
-            sortedIndices,
-            0,
-            -1
-        );
-
-        // Repair the remaining heap.
-        heapifyFrames(
-            workingValues,
-            end,
-            0,
-            timeline,
-            elapsedTime,
-            delay,
-            sortedIndices
-        );
-    }
-
-    // The final remaining value is also sorted.
-    sortedIndices.add(0);
-
-    addHeapFrame(
-        workingValues,
-        timeline,
-        elapsedTime,
-        delay,
-        sortedIndices,
-        -1,
-        -1
-    );
-
-    final List<Integer> sortedValues =
-            new ArrayList<>(workingValues);
-
-    timeline.setOnFinished(e -> {
-        values.clear();
-        values.addAll(sortedValues);
-    });
-
-    timeline.play();
-}
-private void heapifyFrames(
-        List<Integer> values,
-        int heapSize,
-        int rootIndex,
-        Timeline timeline,
-        double[] elapsedTime,
-        double delay,
-        Set<Integer> sortedIndices) {
-
-    int currentRoot = rootIndex;
-
-    while (true) {
-        int largestIndex = currentRoot;
-
-        int leftChild =
-                2 * currentRoot + 1;
-
-        int rightChild =
-                2 * currentRoot + 2;
-
-        // Compare the root with its left child.
-        if (leftChild < heapSize) {
-            addHeapFrame(
-                values,
-                timeline,
-                elapsedTime,
-                delay,
-                sortedIndices,
-                largestIndex,
-                leftChild
-            );
-
-            if (values.get(leftChild)
-                    > values.get(largestIndex)) {
-
-                largestIndex = leftChild;
-            }
+    private void heapAlgo(List<Integer> values) {
+        if (values.size() < 2) {
+            return;
         }
 
-        // Compare the current largest with the right child.
-        if (rightChild < heapSize) {
-            addHeapFrame(
-                values,
-                timeline,
-                elapsedTime,
-                delay,
-                sortedIndices,
-                largestIndex,
-                rightChild
-            );
+        Timeline timeline = new Timeline();
 
-            if (values.get(rightChild)
-                    > values.get(largestIndex)) {
+        double delay = 500;
+        double[] elapsedTime = { 0 };
 
-                largestIndex = rightChild;
-            }
+        List<Integer> workingValues = new ArrayList<>(values);
+
+        Set<Integer> sortedIndices = new HashSet<>();
+
+        int size = workingValues.size();
+
+        // Build the initial max heap.
+        for (int i = size / 2 - 1; i >= 0; i--) {
+            heapifyFrames(
+                    workingValues,
+                    size,
+                    i,
+                    timeline,
+                    elapsedTime,
+                    delay,
+                    sortedIndices);
         }
-
-        // The root is already larger than both children.
-        if (largestIndex == currentRoot) {
-            break;
-        }
-
-        Collections.swap(
-            values,
-            currentRoot,
-            largestIndex
-        );
-
-        // Display the completed swap.
-        addHeapFrame(
-            values,
-            timeline,
-            elapsedTime,
-            delay,
-            sortedIndices,
-            currentRoot,
-            largestIndex
-        );
 
         /*
-         * Continue repairing the heap from
-         * the position where the root moved.
+         * Move the largest value at index 0
+         * to the end of the unsorted section.
          */
-        currentRoot = largestIndex;
+        for (int end = size - 1; end > 0; end--) {
+            addHeapFrame(
+                    workingValues,
+                    timeline,
+                    elapsedTime,
+                    delay,
+                    sortedIndices,
+                    0,
+                    end);
+
+            Collections.swap(
+                    workingValues,
+                    0,
+                    end);
+
+            // The value at end is now permanently sorted.
+            sortedIndices.add(end);
+
+            addHeapFrame(
+                    workingValues,
+                    timeline,
+                    elapsedTime,
+                    delay,
+                    sortedIndices,
+                    0,
+                    -1);
+
+            // Repair the remaining heap.
+            heapifyFrames(
+                    workingValues,
+                    end,
+                    0,
+                    timeline,
+                    elapsedTime,
+                    delay,
+                    sortedIndices);
+        }
+
+        // The final remaining value is also sorted.
+        sortedIndices.add(0);
+
+        addHeapFrame(
+                workingValues,
+                timeline,
+                elapsedTime,
+                delay,
+                sortedIndices,
+                -1,
+                -1);
+
+        final List<Integer> sortedValues = new ArrayList<>(workingValues);
+
+        timeline.setOnFinished(e -> {
+            values.clear();
+            values.addAll(sortedValues);
+        });
+
+        timeline.play();
     }
-}
-private void addHeapFrame(
-        List<Integer> values,
-        Timeline timeline,
-        double[] elapsedTime,
-        double delay,
-        Set<Integer> sortedIndices,
-        int firstIndex,
-        int secondIndex) {
 
-    final List<Integer> currentValues =
-            new ArrayList<>(values);
+    private void heapifyFrames(
+            List<Integer> values,
+            int heapSize,
+            int rootIndex,
+            Timeline timeline,
+            double[] elapsedTime,
+            double delay,
+            Set<Integer> sortedIndices) {
 
-    final Map<Integer, Color> currentColors =
-            new HashMap<>();
+        int currentRoot = rootIndex;
 
-    if (firstIndex >= 0) {
-        currentColors.put(
-            firstIndex,
-            Color.ROYALBLUE
-        );
+        while (true) {
+            int largestIndex = currentRoot;
+
+            int leftChild = 2 * currentRoot + 1;
+
+            int rightChild = 2 * currentRoot + 2;
+
+            // Compare the root with its left child.
+            if (leftChild < heapSize) {
+                addHeapFrame(
+                        values,
+                        timeline,
+                        elapsedTime,
+                        delay,
+                        sortedIndices,
+                        largestIndex,
+                        leftChild);
+
+                if (values.get(leftChild) > values.get(largestIndex)) {
+
+                    largestIndex = leftChild;
+                }
+            }
+
+            // Compare the current largest with the right child.
+            if (rightChild < heapSize) {
+                addHeapFrame(
+                        values,
+                        timeline,
+                        elapsedTime,
+                        delay,
+                        sortedIndices,
+                        largestIndex,
+                        rightChild);
+
+                if (values.get(rightChild) > values.get(largestIndex)) {
+
+                    largestIndex = rightChild;
+                }
+            }
+
+            // The root is already larger than both children.
+            if (largestIndex == currentRoot) {
+                break;
+            }
+
+            Collections.swap(
+                    values,
+                    currentRoot,
+                    largestIndex);
+
+            // Display the completed swap.
+            addHeapFrame(
+                    values,
+                    timeline,
+                    elapsedTime,
+                    delay,
+                    sortedIndices,
+                    currentRoot,
+                    largestIndex);
+
+            /*
+             * Continue repairing the heap from
+             * the position where the root moved.
+             */
+            currentRoot = largestIndex;
+        }
     }
 
-    if (secondIndex >= 0) {
-        currentColors.put(
-            secondIndex,
-            Color.NAVY
-        );
+    private void addHeapFrame(
+            List<Integer> values,
+            Timeline timeline,
+            double[] elapsedTime,
+            double delay,
+            Set<Integer> sortedIndices,
+            int firstIndex,
+            int secondIndex) {
+
+        final List<Integer> currentValues = new ArrayList<>(values);
+
+        final Map<Integer, Color> currentColors = new HashMap<>();
+
+        if (firstIndex >= 0) {
+            currentColors.put(
+                    firstIndex,
+                    Color.ROYALBLUE);
+        }
+
+        if (secondIndex >= 0) {
+            currentColors.put(
+                    secondIndex,
+                    Color.NAVY);
+        }
+
+        // Sorted positions override comparison colors.
+        for (int sortedIndex : sortedIndices) {
+            currentColors.put(
+                    sortedIndex,
+                    Color.FORESTGREEN);
+        }
+
+        timeline.getKeyFrames().add(
+                new KeyFrame(
+                        Duration.millis(elapsedTime[0]),
+                        e -> plotValues(
+                                currentValues,
+                                currentColors)));
+
+        elapsedTime[0] += delay;
     }
 
-    // Sorted positions override comparison colors.
-    for (int sortedIndex : sortedIndices) {
-        currentColors.put(
-            sortedIndex,
-            Color.FORESTGREEN
-        );
-    }
-
-    timeline.getKeyFrames().add(
-        new KeyFrame(
-            Duration.millis(elapsedTime[0]),
-            e -> plotValues(
-                currentValues,
-                currentColors
-            )
-        )
-    );
-
-    elapsedTime[0] += delay;
-}
     private void addBucketFrame(
             Timeline timeline,
             List<List<Integer>> buckets,
@@ -1970,5 +2140,725 @@ private void addHeapFrame(
 
             currentX += groupWidth + gapWidth;
         }
+    }
+
+    // Search Functions
+    private int linearAlgo(List<Integer> values, int target) {
+
+        if (values.isEmpty()) {
+            return -1;
+        }
+
+        Timeline timeline = new Timeline();
+
+        double elapsedTime = 0;
+        double delay = 500;
+
+        for (int i = 0; i < values.size(); i++) {
+
+            final int currentIndex = i;
+
+            Map<Integer, Color> currentColors = new HashMap<>();
+
+            currentColors.put(
+                    currentIndex,
+                    Color.ROYALBLUE);
+
+            timeline.getKeyFrames().add(
+                    new KeyFrame(
+                            Duration.millis(elapsedTime),
+                            e -> {
+                                plotValues(
+                                        values,
+                                        currentColors);
+                            }));
+
+            elapsedTime += delay;
+
+            if (values.get(i) == target) {
+
+                Map<Integer, Color> foundColors = new HashMap<>();
+
+                foundColors.put(
+                        currentIndex,
+                        Color.FORESTGREEN);
+
+                timeline.getKeyFrames().add(
+                        new KeyFrame(
+                                Duration.millis(elapsedTime),
+                                e -> {
+                                    plotValues(
+                                            values,
+                                            foundColors);
+                                }));
+
+                timeline.play();
+
+                return i;
+            }
+        }
+
+        timeline.play();
+
+        return -1;
+    }
+
+    private int sentinelAlgo(List<Integer> values, int target) {
+
+        if (values.isEmpty()) {
+            return -1;
+        }
+
+        Timeline timeline = new Timeline();
+
+        double elapsedTime = 0;
+        double delay = 500;
+
+        // Copy the array so the original is not changed.
+        List<Integer> searchValues = new ArrayList<>(values);
+
+        int lastIndex = searchValues.size() - 1;
+
+        // Save the original last value.
+        int lastValue = searchValues.get(lastIndex);
+
+        // Place the sentinel at the end.
+        searchValues.set(lastIndex, target);
+
+        int i = 0;
+
+        while (searchValues.get(i) != target) {
+
+            final int currentIndex = i;
+
+            Map<Integer, Color> currentColors = new HashMap<>();
+
+            currentColors.put(
+                    currentIndex,
+                    Color.ROYALBLUE);
+
+            timeline.getKeyFrames().add(
+                    new KeyFrame(
+                            Duration.millis(elapsedTime),
+                            e -> {
+                                plotValues(
+                                        values,
+                                        currentColors);
+                            }));
+
+            elapsedTime += delay;
+
+            i++;
+        }
+
+        // Check if we found the real target
+        // instead of only finding the sentinel.
+        boolean found = i < lastIndex || lastValue == target;
+
+        if (found) {
+
+            final int foundIndex = i;
+
+            Map<Integer, Color> foundColors = new HashMap<>();
+
+            foundColors.put(
+                    foundIndex,
+                    Color.FORESTGREEN);
+
+            timeline.getKeyFrames().add(
+                    new KeyFrame(
+                            Duration.millis(elapsedTime),
+                            e -> {
+                                plotValues(
+                                        values,
+                                        foundColors);
+                            }));
+
+            timeline.play();
+
+            return foundIndex;
+        }
+
+        timeline.play();
+
+        return -1;
+    }
+
+    private int randomAlgo(List<Integer> values, int target) {
+
+        if (values.isEmpty()) {
+            return -1;
+        }
+
+        Timeline timeline = new Timeline();
+
+        double elapsedTime = 0;
+        double delay = 500;
+
+        // Create a list of every index.
+        List<Integer> uncheckedIndexes = new ArrayList<>();
+
+        for (int i = 0; i < values.size(); i++) {
+            uncheckedIndexes.add(i);
+        }
+
+        // Randomize the order the indexes will be checked.
+        Collections.shuffle(uncheckedIndexes);
+
+        // Remember indexes that have already been checked.
+        Set<Integer> checkedIndexes = new HashSet<>();
+
+        for (int index : uncheckedIndexes) {
+
+            final int currentIndex = index;
+
+            Map<Integer, Color> currentColors = new HashMap<>();
+
+            // Previously checked indexes stay gray.
+            for (int checkedIndex : checkedIndexes) {
+                currentColors.put(
+                        checkedIndex,
+                        Color.GRAY);
+            }
+
+            // Current index is blue.
+            currentColors.put(
+                    currentIndex,
+                    Color.ROYALBLUE);
+
+            timeline.getKeyFrames().add(
+                    new KeyFrame(
+                            Duration.millis(elapsedTime),
+                            e -> {
+                                plotValues(
+                                        values,
+                                        currentColors);
+                            }));
+
+            elapsedTime += delay;
+
+            // Found target.
+            if (values.get(currentIndex) == target) {
+
+                Map<Integer, Color> foundColors = new HashMap<>();
+
+                // Keep previously checked indexes gray.
+                for (int checkedIndex : checkedIndexes) {
+                    foundColors.put(
+                            checkedIndex,
+                            Color.GRAY);
+                }
+
+                // Found index becomes green.
+                foundColors.put(
+                        currentIndex,
+                        Color.FORESTGREEN);
+
+                timeline.getKeyFrames().add(
+                        new KeyFrame(
+                                Duration.millis(elapsedTime),
+                                e -> {
+                                    plotValues(
+                                            values,
+                                            foundColors);
+                                }));
+
+                timeline.play();
+
+                return currentIndex;
+            }
+
+            // Remember this index was checked.
+            checkedIndexes.add(currentIndex);
+        }
+
+        timeline.play();
+
+        return -1;
+    }
+
+    private int binaryAlgo(List<Integer> values, int target) {
+
+        if (values.isEmpty()) {
+            return -1;
+        }
+
+        Timeline timeline = new Timeline();
+
+        double elapsedTime = 0;
+        double delay = 500;
+
+        int left = 0;
+        int right = values.size() - 1;
+
+        while (left <= right) {
+
+            int middle = left + (right - left) / 2;
+
+            final int currentLeft = left;
+            final int currentRight = right;
+            final int currentMiddle = middle;
+
+            Map<Integer, Color> currentColors = new HashMap<>();
+
+            // Show the current boundaries.
+            currentColors.put(
+                    currentLeft,
+                    Color.NAVY);
+
+            currentColors.put(
+                    currentRight,
+                    Color.NAVY);
+
+            // Current middle value.
+            currentColors.put(
+                    currentMiddle,
+                    Color.ROYALBLUE);
+
+            timeline.getKeyFrames().add(
+                    new KeyFrame(
+                            Duration.millis(elapsedTime),
+                            e -> {
+                                plotValues(
+                                        values,
+                                        currentColors);
+                            }));
+
+            elapsedTime += delay;
+
+            // Target found.
+            if (values.get(middle) == target) {
+
+                Map<Integer, Color> foundColors = new HashMap<>();
+
+                foundColors.put(
+                        currentMiddle,
+                        Color.FORESTGREEN);
+
+                timeline.getKeyFrames().add(
+                        new KeyFrame(
+                                Duration.millis(elapsedTime),
+                                e -> {
+                                    plotValues(
+                                            values,
+                                            foundColors);
+                                }));
+
+                timeline.play();
+
+                return middle;
+            }
+
+            // Target is on the right side.
+            if (values.get(middle) < target) {
+                left = middle + 1;
+            }
+
+            // Target is on the left side.
+            else {
+                right = middle - 1;
+            }
+        }
+
+        timeline.play();
+
+        return -1;
+    }
+
+    private int jumpAlgo(List<Integer> values, int target) {
+
+        if (values.isEmpty()) {
+            return -1;
+        }
+
+        Timeline timeline = new Timeline();
+
+        double elapsedTime = 0;
+        double delay = 500;
+
+        int size = values.size();
+
+        // Jump size is square root of array size.
+        int jumpSize = (int) Math.sqrt(size);
+
+        int previous = 0;
+        int current = 0;
+
+        Set<Integer> checkedIndexes = new HashSet<>();
+
+        // Jump through the array.
+        while (current < size
+                && values.get(current) < target) {
+
+            final int currentIndex = current;
+
+            Map<Integer, Color> currentColors = new HashMap<>();
+
+            // Previous checked positions stay gray.
+            for (int checkedIndex : checkedIndexes) {
+                currentColors.put(
+                        checkedIndex,
+                        Color.GRAY);
+            }
+
+            // Current jump position is blue.
+            currentColors.put(
+                    currentIndex,
+                    Color.ROYALBLUE);
+
+            timeline.getKeyFrames().add(
+                    new KeyFrame(
+                            Duration.millis(elapsedTime),
+                            e -> {
+                                plotValues(
+                                        values,
+                                        currentColors);
+                            }));
+
+            elapsedTime += delay;
+
+            checkedIndexes.add(currentIndex);
+
+            previous = current;
+
+            current += jumpSize;
+        }
+
+        // Don't go past the end of the array.
+        int end = Math.min(current, size - 1);
+
+        // Linear search through the block.
+        for (int i = previous; i <= end; i++) {
+
+            final int currentIndex = i;
+
+            Map<Integer, Color> currentColors = new HashMap<>();
+
+            // Previously checked indexes stay gray.
+            for (int checkedIndex : checkedIndexes) {
+                currentColors.put(
+                        checkedIndex,
+                        Color.GRAY);
+            }
+
+            // Current linear search position.
+            currentColors.put(
+                    currentIndex,
+                    Color.NAVY);
+
+            timeline.getKeyFrames().add(
+                    new KeyFrame(
+                            Duration.millis(elapsedTime),
+                            e -> {
+                                plotValues(
+                                        values,
+                                        currentColors);
+                            }));
+
+            elapsedTime += delay;
+
+            // Target found.
+            if (values.get(i) == target) {
+
+                Map<Integer, Color> foundColors = new HashMap<>();
+
+                for (int checkedIndex : checkedIndexes) {
+                    foundColors.put(
+                            checkedIndex,
+                            Color.GRAY);
+                }
+
+                foundColors.put(
+                        currentIndex,
+                        Color.FORESTGREEN);
+
+                timeline.getKeyFrames().add(
+                        new KeyFrame(
+                                Duration.millis(elapsedTime),
+                                e -> {
+                                    plotValues(
+                                            values,
+                                            foundColors);
+                                }));
+
+                timeline.play();
+
+                return i;
+            }
+
+            checkedIndexes.add(currentIndex);
+
+            // Since the array is sorted,
+            // we can stop if we pass the target.
+            if (values.get(i) > target) {
+                break;
+            }
+        }
+
+        timeline.play();
+
+        return -1;
+    }
+
+    private int interpolationAlgo(List<Integer> values, int target) {
+
+        if (values.isEmpty()) {
+            return -1;
+        }
+
+        Timeline timeline = new Timeline();
+
+        double elapsedTime = 0;
+        double delay = 500;
+
+        int low = 0;
+        int high = values.size() - 1;
+
+        Set<Integer> checkedIndexes = new HashSet<>();
+
+        while (low <= high
+                && target >= values.get(low)
+                && target <= values.get(high)) {
+
+            // Prevent division by zero if all remaining
+            // values are the same.
+            if (values.get(low).equals(values.get(high))) {
+
+                if (values.get(low) == target) {
+
+                    final int foundIndex = low;
+
+                    Map<Integer, Color> foundColors = new HashMap<>();
+
+                    for (int checkedIndex : checkedIndexes) {
+                        foundColors.put(
+                                checkedIndex,
+                                Color.GRAY);
+                    }
+
+                    foundColors.put(
+                            foundIndex,
+                            Color.FORESTGREEN);
+
+                    timeline.getKeyFrames().add(
+                            new KeyFrame(
+                                    Duration.millis(elapsedTime),
+                                    e -> {
+                                        plotValues(
+                                                values,
+                                                foundColors);
+                                    }));
+
+                    timeline.play();
+
+                    return foundIndex;
+                }
+
+                break;
+            }
+
+            // Estimate where the target should be.
+            int position = low
+                    + (int) (((long) (target - values.get(low))
+                            * (high - low))
+                            / (values.get(high) - values.get(low)));
+
+            final int currentPosition = position;
+
+            Map<Integer, Color> currentColors = new HashMap<>();
+
+            // Previously checked positions stay gray.
+            for (int checkedIndex : checkedIndexes) {
+                currentColors.put(
+                        checkedIndex,
+                        Color.GRAY);
+            }
+
+            // Current estimated position is blue.
+            currentColors.put(
+                    currentPosition,
+                    Color.ROYALBLUE);
+
+            timeline.getKeyFrames().add(
+                    new KeyFrame(
+                            Duration.millis(elapsedTime),
+                            e -> {
+                                plotValues(
+                                        values,
+                                        currentColors);
+                            }));
+
+            elapsedTime += delay;
+
+            // Target found.
+            if (values.get(position) == target) {
+
+                Map<Integer, Color> foundColors = new HashMap<>();
+
+                for (int checkedIndex : checkedIndexes) {
+                    foundColors.put(
+                            checkedIndex,
+                            Color.GRAY);
+                }
+
+                foundColors.put(
+                        currentPosition,
+                        Color.FORESTGREEN);
+
+                timeline.getKeyFrames().add(
+                        new KeyFrame(
+                                Duration.millis(elapsedTime),
+                                e -> {
+                                    plotValues(
+                                            values,
+                                            foundColors);
+                                }));
+
+                timeline.play();
+
+                return position;
+            }
+
+            checkedIndexes.add(position);
+
+            // Search the right portion.
+            if (values.get(position) < target) {
+                low = position + 1;
+            }
+
+            // Search the left portion.
+            else {
+                high = position - 1;
+            }
+        }
+
+        timeline.play();
+
+        return -1;
+    }
+
+    private int bidirectionalAlgo(List<Integer> values, int target) {
+
+        if (values.isEmpty()) {
+            return -1;
+        }
+
+        Timeline timeline = new Timeline();
+
+        double elapsedTime = 0;
+        double delay = 500;
+
+        int left = 0;
+        int right = values.size() - 1;
+
+        Set<Integer> checkedIndexes = new HashSet<>();
+
+        while (left <= right) {
+
+            final int currentLeft = left;
+            final int currentRight = right;
+
+            Map<Integer, Color> currentColors = new HashMap<>();
+
+            // Keep previously checked indexes gray.
+            for (int checkedIndex : checkedIndexes) {
+                currentColors.put(
+                        checkedIndex,
+                        Color.GRAY);
+            }
+
+            // Search from both sides.
+            currentColors.put(
+                    currentLeft,
+                    Color.ROYALBLUE);
+
+            currentColors.put(
+                    currentRight,
+                    Color.NAVY);
+
+            timeline.getKeyFrames().add(
+                    new KeyFrame(
+                            Duration.millis(elapsedTime),
+                            e -> {
+                                plotValues(
+                                        values,
+                                        currentColors);
+                            }));
+
+            elapsedTime += delay;
+
+            // Check left side.
+            if (values.get(left) == target) {
+
+                final int foundIndex = left;
+
+                Map<Integer, Color> foundColors = new HashMap<>();
+
+                for (int checkedIndex : checkedIndexes) {
+                    foundColors.put(
+                            checkedIndex,
+                            Color.GRAY);
+                }
+
+                foundColors.put(
+                        foundIndex,
+                        Color.FORESTGREEN);
+
+                timeline.getKeyFrames().add(
+                        new KeyFrame(
+                                Duration.millis(elapsedTime),
+                                e -> {
+                                    plotValues(
+                                            values,
+                                            foundColors);
+                                }));
+
+                timeline.play();
+
+                return foundIndex;
+            }
+
+            // Check right side.
+            if (values.get(right) == target) {
+
+                final int foundIndex = right;
+
+                Map<Integer, Color> foundColors = new HashMap<>();
+
+                for (int checkedIndex : checkedIndexes) {
+                    foundColors.put(
+                            checkedIndex,
+                            Color.GRAY);
+                }
+
+                foundColors.put(
+                        foundIndex,
+                        Color.FORESTGREEN);
+
+                timeline.getKeyFrames().add(
+                        new KeyFrame(
+                                Duration.millis(elapsedTime),
+                                e -> {
+                                    plotValues(
+                                            values,
+                                            foundColors);
+                                }));
+
+                timeline.play();
+
+                return foundIndex;
+            }
+
+            // Both positions have now been checked.
+            checkedIndexes.add(left);
+            checkedIndexes.add(right);
+
+            left++;
+            right--;
+        }
+
+        timeline.play();
+
+        return -1;
     }
 }
