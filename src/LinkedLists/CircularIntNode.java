@@ -1,3 +1,4 @@
+package LinkedLists;
 public class CircularIntNode extends IntNode {
 
     public CircularIntNode(

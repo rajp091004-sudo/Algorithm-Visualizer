@@ -1,3 +1,4 @@
+package array;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.animation.KeyFrame;
@@ -23,6 +24,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
+
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 

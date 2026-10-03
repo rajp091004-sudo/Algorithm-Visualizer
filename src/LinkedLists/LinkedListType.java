@@ -1,3 +1,4 @@
+package LinkedLists;
 public enum LinkedListType {
 
     SINGLY,

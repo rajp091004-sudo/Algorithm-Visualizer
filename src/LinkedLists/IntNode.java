@@ -1,3 +1,4 @@
+package LinkedLists;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -124,4 +125,11 @@ public class IntNode extends Pane {
                 : Color.BLACK
         );
     }
+    public void setFound(boolean found) {
+    circle.setStroke(
+        found
+            ? Color.GREEN
+            : Color.BLACK
+    );
+}
 }

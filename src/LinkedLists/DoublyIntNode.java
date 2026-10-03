@@ -1,3 +1,4 @@
+package LinkedLists;
 public class DoublyIntNode extends IntNode {
 
     private DoublyIntNode previous;

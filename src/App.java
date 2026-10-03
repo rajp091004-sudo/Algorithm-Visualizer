@@ -1,3 +1,5 @@
+import LinkedLists.NodeScreen;
+import array.ArrayScreen;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
