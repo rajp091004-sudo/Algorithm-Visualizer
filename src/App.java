@@ -147,6 +147,10 @@ public class App extends Application {
                 e -> hoverImage.setImage(null)
         );
 
+        button4.setOnAction(
+                e -> window.setScene(scene4)
+        );
+
         //Linked List (Scene 5)
         Button button5 = new Button("Linked List");
         button5.setMinSize(200, 60);
@@ -285,12 +289,14 @@ public class App extends Application {
         scene2 = new Scene(root2, 1280, 700);
 
         //Scene 3
-        //This is currently empty until its screen is implemented.
         BorderPane layout3 = new BorderPane();
         
         ArrayScreen arrayScreen = new ArrayScreen();
         scene3 = arrayScreen.create(window, scene2);
        
+        //Scene 4
+        StackQueue.sqScreen sqScreen = new StackQueue.sqScreen();
+        scene4 = sqScreen.create(window, scene2);
 
         //Scene 5
         //The linked-list screen is created in NodeScreen.java.
