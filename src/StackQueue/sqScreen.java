@@ -1,10 +1,4 @@
 package StackQueue;
-
-import java.util.ArrayList;
-import java.util.List;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
-import javafx.util.Duration;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -13,20 +7,12 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.text.Text;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Stack;
@@ -356,12 +342,6 @@ public class sqScreen {
                 resultText);
     }
 
-    private void updateStackButtons(Button pop, Button peek) {
-        boolean empty = stack.isEmpty();
-
-        pop.setDisable(empty);
-        peek.setDisable(empty);
-    }
 
     private void drawQueue() {
 
