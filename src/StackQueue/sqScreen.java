@@ -78,8 +78,8 @@ public class sqScreen {
         Button push = new Button("Push");
         push.disableProperty().bind(stackInput.textProperty().isEmpty());
         setButtonSize(push);
+
         Button pop = new Button("Pop");
-        pop.setDisable(true);
         setButtonSize(pop);
 
         pop.setOnAction(e -> {
@@ -92,7 +92,6 @@ public class sqScreen {
         });
 
         Button peek = new Button("Peek");
-        peek.setDisable(true);
         setButtonSize(peek);
         peek.setOnAction(e -> {
             if (!stack.isEmpty()) {

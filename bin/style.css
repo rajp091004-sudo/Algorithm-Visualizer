@@ -16,3 +16,9 @@
     -fx-text-fill: white;
     -fx-padding: 8px;
 }
+input.setStyle(
+        "-fx-text-fill: black;" +
+        "-fx-prompt-text-fill: gray;" +
+        "-fx-background-color: white;" +
+        "-fx-border-color: gray;"
+);
